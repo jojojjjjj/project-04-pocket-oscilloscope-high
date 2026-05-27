@@ -1,66 +1,311 @@
-# 口袋示波器配置模板
-# Pocket Oscilloscope Configuration Template
+# ============================================================================
+# TinyAWG 口袋任意波形发生器 配置模板
+# TinyAWG Pocket Arbitrary Waveform Generator Configuration Template
+# ============================================================================
 #
 # 使用方法：复制此文件为 config.yaml，根据实际硬件修改参数
 # Usage: Copy this file as config.yaml and modify parameters for your hardware
+#
+# 本配置文件用于：
+#   1. PC 端上位机软件读取设备参数
+#   2. 嵌入式软件编译时的默认参数参考
+#   3. 硬件校准数据存储
+#
+# This config file is used for:
+#   1. PC host software reading device parameters
+#   2. Default parameter reference during embedded software compilation
+#   3. Hardware calibration data storage
+#
+# ============================================================================
 
-# === 串口配置 | Serial Configuration ===
-serial:
-  port: "COM3"              # 串口号 (Windows: COM3, Linux: /dev/ttyUSB0)
-  baudrate: 115200           # 波特率 | Baud rate
-  timeout: 2                 # 读取超时 (秒) | Read timeout (seconds)
+# ============================================================
+# 硬件参数 | Hardware Parameters
+# ============================================================
 
-# === ADC 配置 | ADC Configuration ===
-adc:
-  resolution: 12             # ADC 分辨率 (bit) | ADC resolution
-  vref: 3.3                  # 参考电压 (V) | Reference voltage
-  sample_count: 1024         # 采样点数 | Sample count
-  sample_rate: 1000000       # 采样率 (Hz) | Sample rate
+# FPGA PL 端 DDS 系统时钟频率 (Hz)
+# FPGA PL-side DDS system clock frequency
+# ZYNQ7010 PL 通常由外部晶振提供，经 MMCM 倍频/分频
+# ZYNQ7010 PL typically sourced from external crystal, scaled via MMCM
+fpga_clock_hz: 200000000          # 200 MHz
 
-# === 显示配置 | Display Configuration ===
+# AD9744 DAC 分辨率 (bits) - 高速主 DAC
+# AD9744 DAC resolution - high-speed main DAC
+dac_resolution: 14
+
+# DAC 更新速率 (samples per second)
+# DAC update rate
+dac_update_rate: 200000000        # 200 MSPS
+
+# 波形查找表 (LUT) 存储深度 (采样点数)
+# Waveform lookup table (LUT) memory depth (sample count)
+# 65536 = 64K 点，使用 FPGA BRAM 存储
+# 65536 = 64K points, stored in FPGA BRAM
+bram_depth: 65536
+
+# 相位累加器位宽 (bits)
+# Phase accumulator width
+# 48-bit 提供 ~0.0007 Hz 的频率分辨率 (在 200MHz 时钟下)
+# 48-bit provides ~0.0007 Hz frequency resolution (at 200MHz clock)
+phase_accumulator_width: 48
+
+# 输出阻抗 (欧姆)
+# Output impedance (ohms)
+output_impedance: 50              # 50Ω 标准信号发生器输出
+
+# 最大输出峰峰值 (V)
+# Maximum output peak-to-peak voltage (V)
+max_output_vpp: 10.0
+
+# 最大输出偏置 (V)
+# Maximum output offset (V)
+max_output_offset: 5.0
+
+
+# ============================================================
+# DAC8562 辅助 DAC 参数 | DAC8562 Auxiliary DAC Parameters
+# ============================================================
+
+# DAC8562 内部基准电压 (V)
+# DAC8562 internal reference voltage
+dac8562_vref: 2.5
+
+# DAC8562 分辨率 (bits)
+# DAC8562 resolution
+dac8562_resolution: 16
+
+# DAC8562 输出范围 = 0 ~ 2 * Vref = 0 ~ 5.0V
+# DAC8562 output range = 0 ~ 2 * Vref = 0 ~ 5.0V
+dac8562_output_range_v: 5.0
+
+# 通道分配 | Channel assignment
+# 通道 A -> 控制可变增益放大器 (幅度 0~10Vpp)
+# 通道 B -> 控制输出直流偏置 (±5V)
+amplitude_channel: A              # 幅度控制通道 | Amplitude control channel
+offset_channel: B                 # 偏置控制通道 | Offset control channel
+
+# SPI 通信参数 | SPI communication parameters
+dac8562_spi_clock_hz: 20000000   # SPI 时钟 20 MHz
+dac8562_spi_mode: 1               # CPOL=0, CPHA=1
+
+
+# ============================================================
+# AD9744 高速 DAC 参数 | AD9744 High-Speed DAC Parameters
+# ============================================================
+
+# AD9744 数据格式
+# AD9744 data format
+# offset_binary: 0~16383 无符号 | unsigned
+# twos_complement: -8192~+8191 有符号 | signed
+ad9744_data_format: offset_binary
+
+# AD9744 满量程输出电流 (mA)
+# AD9744 full-scale output current (mA)
+ad9744_fs_current_ma: 20.0
+
+
+# ============================================================
+# 默认波形参数 | Default Waveform Parameters
+# ============================================================
+
+# 默认输出频率 (Hz)
+# Default output frequency
+default_frequency_hz: 1000        # 1 kHz
+
+# 默认输出幅度 (Vpp)
+# Default output amplitude
+default_amplitude_vpp: 1.0        # 1 Vpp
+
+# 默认输出偏置 (V)
+# Default output offset
+default_offset_v: 0.0             # 0V (无偏置)
+
+# 默认波形类型
+# Default waveform type
+# 可选值 Options: sine, square, triangle, ramp, pulse, noise,
+#                sinc, exp_decay, ecg, half_rect, full_rect, staircase
+default_waveform: sine
+
+# 启动时默认使能输出
+# Enable output by default on startup
+default_output_enabled: false
+
+
+# ============================================================
+# 扫频参数 | Sweep Parameters
+# ============================================================
+
+sweep:
+  default_start_freq_hz: 100      # 默认起始频率 | Default start frequency
+  default_stop_freq_hz: 100000    # 默认终止频率 | Default stop frequency
+  default_step_freq_hz: 100       # 默认步进 | Default step
+  default_dwell_ms: 100           # 每步停留时间 (ms) | Dwell time per step
+  mode: linear                    # 扫频模式: linear, logarithmic
+
+
+# ============================================================
+# AM 调制参数 | AM Modulation Parameters
+# ============================================================
+
+modulation:
+  default_carrier_freq_hz: 1000000   # 默认载波频率 1MHz
+  default_mod_freq_hz: 1000          # 默认调制频率 1kHz
+  default_depth: 0.5                  # 默认调制深度 50%
+  max_depth: 1.0                      # 最大调制深度 100%
+  mod_update_rate_hz: 1000            # 调制更新速率 (Hz)
+
+
+# ============================================================
+# 显示设置 | Display Settings
+# ============================================================
+
 display:
-  width: 160                 # 屏幕宽度 (像素) | Screen width (pixels)
-  height: 128                # 屏幕高度 (像素) | Screen height (pixels)
-  grid_div_x: 8              # 水平网格数 | Horizontal divisions
-  grid_div_y: 6              # 垂直网格数 | Vertical divisions
+  # LCD 规格 | LCD specifications
+  lcd_width: 320                   # 像素宽度 | Width in pixels
+  lcd_height: 240                  # 像素高度 | Height in pixels
+  lcd_interface: spi               # 接口类型: spi, parallel
 
-# === 触发配置 | Trigger Configuration ===
-trigger:
-  mode: "auto"               # 触发模式: auto, normal, single
-  slope: "rising"            # 触发边沿: rising, falling
-  level: 0                   # 触发电平 (0=自动) | Trigger level (0=auto)
-  holdoff_ms: 100            # 释抑时间 (ms) | Holdoff time
+  # LVGL 参数 | LVGL parameters
+  lvgl_color_depth: 16             # 色深: 16-bit (RGB565)
+  lvgl_refresh_rate: 30            # 刷新率 (Hz)
+  lvgl_draw_buf_lines: 10          # 绘图缓冲区行数
 
-# === 时基配置 | Timebase Configuration ===
-timebase:
-  current_level: 1           # 当前档位 (0~7) | Current level
-  levels:                    # 时基档位表 | Timebase level table
-    - { label: "10us/div",  sample_rate: 1000000 }
-    - { label: "20us/div",  sample_rate: 1000000 }
-    - { label: "50us/div",  sample_rate: 400000 }
-    - { label: "100us/div", sample_rate: 200000 }
-    - { label: "200us/div", sample_rate: 100000 }
-    - { label: "500us/div", sample_rate: 40000 }
-    - { label: "1ms/div",   sample_rate: 20000 }
-    - { label: "10ms/div",  sample_rate: 2000 }
+  # 背光 PWM 频率 | Backlight PWM frequency
+  backlight_pwm_hz: 1000
 
-# === 信号发生器配置 | Signal Generator Configuration ===
-signal_gen:
-  enabled: true              # 是否启用信号发生器
-  default_freq: 1000         # 默认频率 (Hz) | Default frequency
-  default_waveform: "sine"   # 默认波形: sine, triangle, square
-  freq_presets:              # 预设频率列表 | Frequency presets
-    - 100
-    - 500
-    - 1000
-    - 2000
-    - 5000
-    - 10000
-    - 50000
-    - 100000
+  # 默认背光亮度 (0~100%)
+  default_brightness: 80
 
-# === 日志配置 | Logging Configuration ===
-logging:
-  level: "INFO"              # 日志级别: DEBUG, INFO, WARNING, ERROR
-  save_waveforms: true       # 是否保存波形数据
-  waveform_dir: "waveforms"  # 波形保存目录
+
+# ============================================================
+# 触摸屏设置 | Touchscreen Settings
+# ============================================================
+
+touch:
+  # FT6336 I2C 地址 | FT6336 I2C address
+  ft6336_i2c_addr: 0x38
+
+  # 触摸屏校准参数 (需实测调整)
+  # Touchscreen calibration parameters (adjust after measurement)
+  calibrate:
+    x_min: 0
+    x_max: 320
+    y_min: 0
+    y_max: 240
+    x_mirror: false
+    y_mirror: false
+    xy_swap: false
+
+
+# ============================================================
+# 电池监测 | Battery Monitoring
+# ============================================================
+
+battery:
+  # MAX17048 I2C 地址 | MAX17048 I2C address
+  max17048_i2c_addr: 0x36
+
+  # 锂电池参数 | Li-ion battery parameters
+  full_voltage: 4.2               # 满充电压 (V)
+  cutoff_voltage: 3.0             # 截止电压 (V)
+  nominal_voltage: 3.7            # 标称电压 (V)
+  capacity_mah: 1500              # 容量 (mAh)
+
+  # 低电量阈值 (%) - 低于此值自动关闭输出
+  low_battery_threshold: 10
+
+  # 电量读取间隔 (ms)
+  read_interval_ms: 5000
+
+
+# ============================================================
+# 校准参数 | Calibration Parameters
+# ============================================================
+
+calibration:
+  # 幅度校准: DAC8562 码值 -> 实际输出 Vpp
+  # Amplitude calibration: DAC8562 code -> actual output Vpp
+  # 格式: [DAC8562_code, measured_Vpp]
+  # 使用线性插值在相邻点之间计算
+  # Uses linear interpolation between adjacent points
+  amplitude_table:
+    - [0, 0.0]
+    - [13107, 2.0]                 # ~1/5 满量程
+    - [26214, 4.0]
+    - [39321, 6.0]
+    - [52428, 8.0]
+    - [65535, 10.0]
+
+  # 偏置校准: DAC8562 码值 -> 实际输出偏置 (V)
+  # Offset calibration: DAC8562 code -> actual output offset (V)
+  offset_table:
+    - [0, -5.0]
+    - [16384, -2.5]
+    - [32768, 0.0]
+    - [49152, 2.5]
+    - [65535, 5.0]
+
+  # 频率校准: 在特定频率点测量实际输出频率
+  # Frequency calibration: measure actual output at specific frequencies
+  # 格式: [设定频率_Hz, 实测频率_Hz]
+  frequency_table:
+    - [1000, 1000.0]
+    - [10000, 10000.0]
+    - [100000, 100000.0]
+    - [1000000, 1000000.0]
+    - [10000000, 10000000.0]
+
+
+# ============================================================
+# 串口通信 | Serial Communication
+# ============================================================
+
+serial:
+  # UART 波特率 | UART baud rate
+  baudrate: 115200
+
+  # 上位机协议版本 | Host protocol version
+  protocol_version: "1.0"
+
+  # 命令终止符 | Command terminator
+  line_ending: "\n"
+
+  # 超时时间 (ms) | Timeout (ms)
+  timeout_ms: 1000
+
+
+# ============================================================
+# WS2812 LED | WS2812 Status LED
+# ============================================================
+
+led:
+  # LED 数量 | LED count
+  count: 1
+
+  # 默认颜色 (RGB, 0~255)
+  default_color:
+    r: 0
+    g: 128
+    b: 255                        # 默认蓝色 | Default blue
+
+  # 状态指示颜色映射 | Status indication color map
+  status_colors:
+    idle: [0, 128, 255]           # 空闲: 蓝色 | Idle: blue
+    output_on: [0, 255, 0]        # 输出中: 绿色 | Outputting: green
+    sweep: [255, 128, 0]          # 扫频: 橙色 | Sweep: orange
+    modulation: [128, 0, 255]     # 调制: 紫色 | Modulation: purple
+    error: [255, 0, 0]            # 错误: 红色 | Error: red
+    low_battery: [255, 255, 0]    # 低电量: 黄色 | Low battery: yellow
+
+
+# ============================================================
+# 调试设置 | Debug Settings
+# ============================================================
+
+debug:
+  # 使能 UART 调试输出
+  # Enable UART debug output
+  enable_uart_debug: true
+
+  # 日志级别: DEBUG, INFO, WARNING, ERROR
+  # Log level
+  log_level: INFO

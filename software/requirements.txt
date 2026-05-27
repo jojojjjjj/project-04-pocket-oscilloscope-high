@@ -1,10 +1,24 @@
-# 口袋示波器 PC 端工具依赖
-# Pocket Oscilloscope PC Tool Dependencies
+# TinyAWG 口袋任意波形发生器 PC 端工具依赖
+# TinyAWG Pocket Arbitrary Waveform Generator PC Tool Dependencies
+#
+# 用途：PC 端波形生成验证、可视化、上位机通信
+# Purpose: PC-side waveform generation verification, visualization, host communication
 #
 # 安装方法：pip install -r requirements.txt
 # Install: pip install -r requirements.txt
 
-pyserial>=3.5          # 串口通信 | Serial communication
-matplotlib>=3.5.0      # 波形绘图 | Waveform plotting
-numpy>=1.21.0          # 数值计算 | Numerical computation
-PyYAML>=6.0            # 配置文件解析 | Config file parsing
+# 波形生成和数据分析 | Waveform generation and data analysis
+numpy>=1.21.0          # 数值计算 (波形数据生成与处理)
+                       # Numerical computation (waveform data generation & processing)
+
+# 波形可视化 | Waveform visualization
+matplotlib>=3.5.0      # 波形绘图 (测试图表生成)
+                       # Waveform plotting (test chart generation)
+
+# 串口通信 (上位机与 TinyAWG 通信) | Serial communication (host-TinyAWG)
+pyserial>=3.5          # 串口通信 (UART 命令和波形上传)
+                       # Serial communication (UART commands and waveform upload)
+
+# 配置文件解析 | Configuration file parsing
+PyYAML>=6.0            # YAML 配置文件读写
+                       # YAML config file read/write

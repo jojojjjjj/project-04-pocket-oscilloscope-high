@@ -1,12 +1,12 @@
-# Day 01: 项目启动与示波器原理 | Project Launch & Oscilloscope Principles
+# Day 01: 项目启动与信号发生器原理 | Project Launch & Signal Generator Principles
 
 > **今日目标 Today's Objectives:**
-> - 理解示波器的基本工作原理和核心参数
-> - 搭建 STM32 开发环境 (STM32CubeMX + Keil/CubeIDE)
-> - 完成第一个 STM32 程序：LED 闪烁
-> - 理解 GPIO 的基本概念和配置方法
+> - 理解信号发生器的基本工作原理和核心参数
+> - 掌握 DDS（直接数字频率合成）的基本概念
+> - 了解 TinyAWG 系统架构（PS + PL 双核协同）
+> - 完成硬件环境检查与 Vivado 安装验证
 >
-> **产出 Deliverable:** 开发环境就绪，STM32 蓝pill板 LED 成功闪烁
+> **产出 Deliverable:** 完成硬件清单核对，Vivado 可正常启动，理解 TinyAWG 系统框图
 
 ---
 
@@ -14,235 +14,364 @@
 
 | 时间 Time | 活动类型 Type | 内容 Content |
 |----------|-------------|-------------|
-| 09:00-09:30 | 晨会 | 开营仪式、自我介绍、课程介绍 |
-| 09:30-10:30 | 知识讲解 | 示波器原理与核心参数 |
-| 10:30-10:45 | 休息 | Break |
-| 10:45-12:00 | 动手实验 | 硬件环境搭建 + 软件安装检查 |
-| 12:00-13:30 | 午餐 | Lunch + Break |
-| 13:30-15:00 | 动手实验 | CubeMX 工程创建 + LED 闪烁 |
-| 15:00-15:15 | 休息 | Break |
-| 15:15-16:30 | 动手实验 | GPIO 深入 + 按键输入实验 |
-| 16:30-17:00 | 回顾 | 今日总结 + 答疑 |
+| 09:00-09:30 | 晨会 Morning Meeting | 开营仪式、自我介绍、课程介绍 |
+| 09:30-10:30 | 知识讲解 Lecture | 信号发生器原理与 DDS 概念 |
+| 10:30-10:45 | 休息 Break | Break |
+| 10:45-12:00 | 知识讲解 Lecture | TinyAWG 系统架构与核心参数 |
+| 12:00-13:30 | 午餐 Lunch | Lunch + Break |
+| 13:30-15:00 | 动手实验 Hands-on | Vivado 安装检查 + ZYNQ 核心板认识 |
+| 15:00-15:15 | 休息 Break | Break |
+| 15:15-16:30 | 动手实验 Hands-on | JTAG 连接 + 硬件套件完整检查 |
+| 16:30-17:00 | 回顾 Review | 今日总结 + 答疑 |
 
 ---
 
-## 上午: 认识示波器 | Morning: Understanding the Oscilloscope
+## 上午: 认识信号发生器 | Morning: Understanding the Signal Generator
 
 ### 为什么要学这个? | Why Learn This?
 
-示波器被称为"电子工程师的眼睛"。在调试任何电路时，你最常问的问题是："这个信号长什么样？" 是正弦波还是方波？频率是多少？有没有噪声？这些问题只有示波器能回答。
+信号发生器被称为"电子实验室的心脏"。如果说示波器是用来"看"信号的眼睛，那么信号发生器就是用来"产生"信号的心脏。无论是测试放大器增益、校准滤波器、还是驱动扬声器发声，你都需要一个可控的信号源。
 
-The oscilloscope is called the "eye of electronics engineers." When debugging any circuit, the most common question is: "What does this signal look like?" Is it a sine wave or square wave? What frequency? Is there noise? Only an oscilloscope can answer these questions.
+A signal generator is called the "heart of the electronics lab." If an oscilloscope is the eye that "sees" signals, then a signal generator is the heart that "produces" signals. Whether testing amplifier gain, calibrating filters, or driving speakers, you need a controllable signal source.
 
-你将亲手打造的这台示波器，虽然比不上几万元的商用示波器，但它包含了示波器的全部核心原理：**采样**、**量化**、**触发**、**显示**。理解了这些原理，将来使用任何示波器都会得心应手。
+你将亲手打造的 TinyAWG（Tiny Arbitrary Waveform Generator），虽然体积只有口袋大小，但性能令人惊叹：**200MSa/s 采样率、14-bit 分辨率、35MHz 带宽**。它的秘密武器是 Xilinx ZYNQ7010 芯片——一颗芯片里同时包含了 ARM 处理器和 FPGA 可编程逻辑，让软件和硬件完美协同。
 
-The oscilloscope you will build, while not matching commercial ones costing tens of thousands of yuan, contains all the core principles: **sampling**, **quantization**, **triggering**, and **display**. Understanding these principles will make you proficient with any oscilloscope in the future.
+The TinyAWG you will build is pocket-sized yet remarkably powerful: **200MSa/s, 14-bit resolution, 35MHz bandwidth**. Its secret weapon is the Xilinx ZYNQ7010 chip — a single chip containing both an ARM processor and FPGA programmable logic, enabling perfect software-hardware coordination.
 
-### 任务 1.1: 什么是示波器？ (30 分钟)
+### 任务 1.1: 什么是信号发生器？ (30 分钟)
 
 **什么是波形？**
 
 在电子世界中，电压会随时间变化。把这种变化画成图，就是"波形"（Waveform）。
 
-- **正弦波 (Sine Wave):** 最基本的波形，交流电就是正弦波
-- **方波 (Square Wave):** 数字信号的基本波形，Arduino PWM 输出就是方波
-- **三角波 (Triangle Wave):** 锯齿状上升和下降的波形
-- **噪声 (Noise):** 不规则的随机波动
+- **正弦波 (Sine Wave):** 最基本的波形，交流电就是正弦波。一切复杂信号都可以分解成正弦波的叠加（傅里叶定理）
+- **方波 (Square Wave):** 数字信号的基本波形，在高低电平之间快速切换
+- **三角波 (Triangle Wave):** 线性上升和下降的波形，常用于扫频和 PWM 产生
+- **锯齿波 (Sawtooth Wave):** 线性上升后瞬间归零，常用于 CRT 扫描和音频合成
+- **任意波 (Arbitrary Waveform):** 用户自定义的任意形状波形，这就是 "AWG" 中的 "A"
 
-**示波器的工作原理 (简化版)：**
+**信号发生器的分类：**
+
+| 类型 Type | 特点 Feature | 典型应用 Typical Use |
+|----------|-------------|-------------------|
+| 函数发生器 Function Generator | 输出标准波形（正弦、方波、三角波） | 通用电路测试 |
+| 任意波形发生器 AWG | 可输出用户自定义的任意波形 | 通信仿真、复杂信号测试 |
+| DDS 发生器 DDS Generator | 用数字方法精确控制频率和相位 | 高精度频率源、通信系统 |
+
+**你将制作的 TinyAWG 属于 DDS 任意波形发生器——既能输出标准波形，也能自定义任意波形，而且频率精确度极高。**
+
+**信号发生器的工作原理 (简化版)：**
 
 ```
-被测信号 → [前端电路] → [ADC 采样] → [MCU 处理] → [屏幕显示]
-             衰减/放大     模拟→数字     触发/存储     波形绘制
+频率控制字 → [相位累加器] → [波形查找表] → [DAC] → [滤波器] → 模拟输出
+   FCW         Phase Accum     LUT/BRAM     AD9744   低通滤波    输出端口
 ```
 
-1. **前端电路：** 调节信号幅度，使之适合 ADC 的输入范围（0~3.3V）
-2. **ADC 采样：** 把连续的模拟电压信号转换成数字值（0~4095 对应 0~3.3V）
-3. **MCU 处理：** 微控制器决定何时触发、如何存储波形数据
-4. **屏幕显示：** 将数字数据还原为屏幕上的波形图
-
-**示波器的核心参数：**
-
-| 参数 Parameter | 含义 Meaning | 本项目目标 |
-|--------------|-------------|----------|
-| 带宽 Bandwidth | 能测量的最高频率信号 | ~200kHz |
-| 采样率 Sampling Rate | 每秒采集多少个点 | 1Msps |
-| 分辨率 Resolution | 电压测量精度 | 12-bit (4096级) |
-| 通道数 Channels | 同时测量几路信号 | 1 通道 |
-| 时基 Timebase | 横轴每格代表多少时间 | 1us/div ~ 100ms/div |
-
-**关键公式：**
-
-- 采样周期 = 1 / 采样率 = 1 / 1,000,000 = 1us
-- 电压分辨率 = 3.3V / 4096 = 0.8mV
-- 奈奎斯特定理：要准确测量某频率信号，采样率必须 > 2倍信号频率
+1. **频率控制字 (FCW):** 一个数字值，决定输出信号的频率
+2. **相位累加器 (Phase Accumulator):** 每个时钟周期将 FCW 累加，产生连续增长的相位值
+3. **波形查找表 (LUT):** 将相位值映射为对应的波形幅值（存储在 FPGA 的 BRAM 中）
+4. **DAC (数模转换器):** 将数字幅值转换为模拟电压信号
+5. **滤波器 (Filter):** 平滑 DAC 输出的阶梯状波形
 
 **步骤 Steps:**
-1. 观看 B 站视频：尤里卡学院《示波管原理演示视频》
-   - 链接：https://www.bilibili.com/video/BV174411h7bn/
-2. 观看 B 站视频：Expert电子实验室《如何用示波器的触发捕捉波形》
-   - 链接：https://www.bilibili.com/video/BV1HRVRz3EyK/
-3. 用纸笔画出你理解的示波器工作流程图
-4. 回答问题：如果要测量一个 100kHz 的正弦波，采样率至少需要多少？
+1. 观看 B 站视频：了解信号发生器的基本用途
+   - 搜索关键词："信号发生器 原理 教程"
+2. 观看 B 站视频：DDS 直接数字频率合成原理
+   - 搜索关键词："DDS 原理 直接数字频率合成"
+3. 用纸笔画出你理解的信号发生器工作流程图
+4. 回答问题：如果要产生一个 1kHz 的正弦波，每个周期至少需要多少个采样点才能看起来"像"正弦波？
 
 **预期结果 Expected Result:**
-能画出信号从输入到显示的完整流程图，能正确计算最低采样率 (200kHz 以上)。
+能画出从频率控制字到模拟输出的完整 DDS 流程图，理解每个环节的作用。
 
 **常见问题 Common Issues:**
-- "采样率越高越好吗？" -- 是的，但受限于 ADC 硬件。STM32 内置 ADC 最高约 1Msps。
-- "12-bit 分辨率够用吗？" -- 对于入门级示波器足够。专业示波器通常 8-bit 高速 ADC。
+- "DDS 和传统模拟振荡器有什么区别？" -- DDS 用纯数字方法产生信号，频率精度远高于模拟振荡器，而且可以瞬间切换频率
+- "为什么需要 DAC？" -- FPGA 内部只能处理数字信号，DAC 负责把数字转换为真实的模拟电压
 
-### 任务 1.2: 硬件环境搭建 (45 分钟)
+### 任务 1.2: DDS 原理入门 (30 分钟)
+
+**为什么要学 DDS？**
+
+DDS（Direct Digital Synthesis，直接数字频率合成）是现代信号发生器的核心技术。理解 DDS，你就理解了 TinyAWG 的核心工作原理。它是连接"数字世界"（FPGA）和"模拟世界"（真实信号）的桥梁。
+
+DDS (Direct Digital Synthesis) is the core technology of modern signal generators. Understanding DDS means understanding how TinyAWG works at its core. It is the bridge between the "digital world" (FPGA) and the "analog world" (real signals).
+
+**DDS 核心公式：**
+
+```
+f_out = (FCW / 2^N) × f_clk
+```
+
+其中：
+- `f_out` = 输出信号频率（你想产生的频率）
+- `FCW` = 频率控制字（Frequency Control Word），一个整数
+- `N` = 相位累加器的位宽（TinyAWG 中通常为 32 位）
+- `f_clk` = 系统时钟频率（TinyAWG 中为 200MHz）
+
+**举个例子：**
+
+假设我们想产生一个 1MHz 的正弦波：
+- f_clk = 200,000,000 Hz (200MHz)
+- N = 32 (32 位相位累加器)
+- FCW = f_out × 2^N / f_clk = 1,000,000 × 4,294,967,296 / 200,000,000 = 21,474,836.48 ≈ 21,474,836
+
+```
+相位累加器工作过程（简化，4位示例）：
+
+时钟周期 | 累加器值 | 对应角度 | 正弦值
+---------|---------|---------|--------
+   0     |  0000   |   0°    |  0.000
+   1     |  0011   |  67.5°  |  0.924
+   2     |  0110   | 135°    |  0.707
+   3     |  1001   | 202.5°  | -0.383
+   4     |  1100   | 270°    | -1.000
+   5     |  1111   | 337.5°  | -0.383
+   6     | 0010    |  45°    |  0.707   ← 溢出后从0继续
+   ...
+```
 
 **步骤 Steps:**
-
-1. **检查硬件清单：** 对照 `hardware/BOM.md` 检查所有元件是否到齐
-2. **认识蓝pill板：**
-   - 找到 USB 接口、电源指示灯 (PWR)、板载 LED (PC13)
-   - 找到各引脚的位置：PA0-PA15, PB0-PB15, PC13-PC15
-   - 找到 SWD 调试接口：SWDIO, SWCLK, GND, 3.3V
-3. **连接 ST-Link V2：**
-   - ST-Link SWDIO → 蓝pill SWDIO
-   - ST-Link SWCLK → 蓝pill SWCLK
-   - ST-Link GND → 蓝pill GND
-   - ST-Link 3.3V → 蓝pill 3.3V (也可用 USB 供电)
-4. **安装驱动：** 如果 ST-Link 未被识别，安装驱动程序
+1. 用计算器验证上面的例子：当 FCW = 21,474,836，f_clk = 200MHz，N = 32 时，f_out 是否约等于 1MHz？
+2. 思考：如果要产生 10MHz 的信号，FCW 应该是多少？
+3. 用纸笔模拟一个 4 位相位累加器的工作过程（FCW = 3），写出前 16 个时钟周期的累加器值
 
 **预期结果 Expected Result:**
-- 电脑设备管理器中能看到 STLink USB 设备
-- STM32CubeMX 能识别到 STM32F103C8Tx 芯片
+能手动计算给定频率的 FCW 值，能解释相位累加器溢出后如何自动产生周期性波形。
 
 **常见问题 Common Issues:**
-- "ST-Link 无法识别" -- 检查 USB 线是否为数据线（非充电线），重新安装驱动
-- "设备管理器显示感叹号" -- 右键更新驱动，选择 ST-Link 驱动目录
+- "为什么相位累加器溢出不是错误？" -- 因为正弦波本身就是周期性的，相位超过 360° 就回到 0°，所以溢出恰好对应波形的下一个周期
+- "FCW 必须是整数，那输出频率有误差吗？" -- 是的，有微小误差。当 N=32 时，频率分辨率为 200MHz/2^32 ≈ 0.047Hz，精度极高
+
+### 任务 1.3: TinyAWG 系统架构 (45 分钟)
+
+**TinyAWG 的"大脑"——ZYNQ7010**
+
+ZYNQ7010 是一颗非常特殊的芯片，它把两个完全不同的"处理器"封装在一起：
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    ZYNQ7010 芯片                          │
+│                                                          │
+│  ┌──────────────────┐    ┌──────────────────────────┐   │
+│  │   PS (Processing  │    │    PL (Programmable       │   │
+│  │    System)        │    │      Logic)               │   │
+│  │                   │    │                           │   │
+│  │  ARM Cortex-A9    │    │   FPGA (Artix-7)          │   │
+│  │  双核 650MHz      │    │   可编程逻辑门阵列          │   │
+│  │                   │    │                           │   │
+│  │  运行 C 代码:     │    │  运行 Verilog:            │   │
+│  │  - LVGL GUI      │◄──►│  - DDS 流水线             │   │
+│  │  - 触摸驱动       │AXI │  - 波形查找表 BRAM         │   │
+│  │  - DAC 控制       │Bus │  - AXI Lite 寄存器        │   │
+│  │  - 电池管理       │    │  - DAC 数据接口            │   │
+│  │                   │    │                           │   │
+│  │  DDR3 内存控制    │    │   2560 LUTs, 5328 FFs    │   │
+│  │  SD 卡启动        │    │   2.1Mb BRAM              │   │
+│  └──────────────────┘    └──────────────────────────┘   │
+└─────────────────────────────────────────────────────────┘
+         │                                    │
+         │                                    │
+    ┌────▼────┐                         ┌────▼────┐
+    │  DDR3   │                         │ AD9744  │
+    │  内存    │                         │  DAC    │
+    │ 256MB   │                         │ 14-bit  │
+    └─────────┘                         └────┬────┘
+                                            │
+                                       ┌────▼────┐
+                                       │OPA2673  │
+                                       │ 运放     │
+                                       │ 滤波+放大│
+                                       └────┬────┘
+                                            │
+                                       ┌────▼────┐
+                                       │ SMA输出  │
+                                       │ BNC接口  │
+                                       └─────────┘
+```
+
+**为什么要 PS + PL 双架构？**
+
+在 TinyAWG 中，ARM 和 FPGA 各有所长，分工明确：
+
+| 模块 Module | 负责人 Who | 任务 What | 为什么 Why |
+|------------|-----------|----------|-----------|
+| LVGL GUI 触摸界面 | ARM (PS) | 显示菜单、接收触摸输入 | GUI 需要灵活的软件逻辑，用 C 代码开发效率高 |
+| DDS 相位累加 | FPGA (PL) | 高速相位累加、查表输出 | 需要 200MHz 精确时序，硬件逻辑无抖动 |
+| 波形存储 (BRAM) | FPGA (PL) | 存储正弦/方波/任意波的采样点 | BRAM 是 FPGA 内部高速存储，一个时钟周期即可读取 |
+| DAC 数据接口 | FPGA (PL) | 按 200MHz 节拍向 AD9744 送数据 | 需要精确的时序控制，软件做不到这么快 |
+| 电池电压监测 | ARM (PS) | ADC 读取电池电压 | 低速任务，用 ARM 的软件 ADC 就够了 |
+| PS ↔ PL 通信 | AXI 总线 | ARM 写寄存器控制 FPGA 参数 | AXI 是标准的总线协议，打通软硬件 |
+
+**TinyAWG 的核心参数：**
+
+| 参数 Parameter | 含义 Meaning | TinyAWG 规格 |
+|--------------|-------------|-------------|
+| 采样率 Sampling Rate | 每秒输出多少个采样点 | 200MSa/s (每秒2亿个点) |
+| 分辨率 Resolution | 每个采样点的精度 | 14-bit (16384级) |
+| 带宽 Bandwidth | 能输出的最高频率 | 35MHz |
+| DAC | 数模转换芯片 | AD9744 (14-bit, 210MSa/s) |
+| 输出运放 | 信号放大和滤波 | OPA2673IRGVT |
+| 显示 | 人机界面 | 2.8" 触摸屏, LVGL 8.3.1 |
+| 功耗 Power | 电池续航 | 锂电池供电 |
+| 成本 Cost | 制作成本 | 约 220 元 |
+
+**步骤 Steps:**
+1. 对照系统框图，在纸上抄画一遍 TinyAWG 的系统架构
+2. 标注每个模块对应芯片的型号
+3. 回答问题：为什么 DDS 相位累加要用 FPGA 而不用 ARM 的 C 代码？
+
+**预期结果 Expected Result:**
+能完整画出 TinyAWG 系统框图，能解释 PS 和 PL 各自的职责分工。
+
+**常见问题 Common Issues:**
+- "ARM 不够快吗？为什么还需要 FPGA？" -- ARM 运行 C 代码，一条指令需要多个时钟周期，而且有中断、操作系统等不确定延迟。FPGA 是纯硬件逻辑，每个时钟周期都精确定位，200MHz 就是 200MHz，不多不少
+- "什么是 AXI？" -- AXI (Advanced eXtensible Interface) 是 ARM 定义的一种高速总线协议，ZYNQ 中 PS 和 PL 通过 AXI 总线通信。你可以把它理解为 ARM 和 FPGA 之间的"高速公路"
 
 ---
 
-## 下午: 第一个 STM32 程序 | Afternoon: First STM32 Program
+## 下午: 硬件环境搭建 | Afternoon: Hardware Environment Setup
 
-### 任务 1.3: CubeMX 工程创建 (45 分钟)
+### 任务 1.4: Vivado 安装检查 (45 分钟)
 
-**步骤 Steps:**
+**为什么要检查 Vivado？**
 
-1. 打开 STM32CubeMX，点击 "ACCESS TO MCU SELECTOR"
-2. 搜索并选择 "STM32F103C8Tx"
-3. **配置时钟：**
-   - 在 Pinout 页面，将 RCC -> HSE 设置为 "Crystal/Ceramic Resonator"
-   - 在 Clock Configuration 页面：
-     - HSE 输入 8MHz
-     - PLL 倍频选择 x9
-     - 系统时钟 = 72MHz
-4. **配置 GPIO 输出 (LED):**
-   - 点击 PC13 引脚，选择 "GPIO_Output"
-   - 在 System Core -> GPIO 中：
-     - PC13 的 User Label 设为 "LED"
-     - GPIO output level 设为 "High" (LED 默认灭，低电平点亮)
-5. **配置串口 (调试用)：**
-   - 在 Connectivity -> USART1 中，Mode 设为 "Asynchronous"
-   - 波特率设为 115200
-6. **生成代码：**
-   - Project Manager -> 填写工程名称和路径
-   - Toolchain/IDE 选择 "MDK-ARM V5" 或 "STM32CubeIDE"
-   - 点击 "GENERATE CODE"
+Vivado 是 Xilinx FPGA 的官方开发工具，是我们整个项目的"工作台"。所有的 FPGA 设计——包括 Block Design、Verilog 编写、综合、实现、下载——都在 Vivado 中完成。它是一个庞大的软件（安装包约 30GB），必须提前安装好。
 
-**预期结果 Expected Result:**
-- 成功生成 STM32 工程代码
-- 在 Keil/CubeIDE 中能打开工程并编译通过
-
-### 任务 1.4: LED 闪烁程序 (45 分钟)
+Vivado is the official development tool for Xilinx FPGAs, serving as the "workbench" for our entire project. All FPGA design work — Block Design, Verilog coding, synthesis, implementation, and downloading — happens in Vivado. It is a large piece of software (~30GB installer) that must be installed in advance.
 
 **步骤 Steps:**
 
-1. 打开生成的工程，在 `main.c` 的 `USER CODE BEGIN` 区域添加代码：
+1. **确认 Vivado 版本：**
+   - 打开 Vivado（桌面快捷方式或开始菜单）
+   - 查看版本号：Help → About Vivado
+   - 推荐版本：**Vivado 2018.3** 或 **Vivado 2020.2**（与 TinyAWG 开源工程兼容）
+   - 如果版本不对或未安装，向助教报告
 
-```c
-/* USER CODE BEGIN WHILE */
-while (1)
-{
-    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);  // 翻转 PC13 (LED)
-    HAL_Delay(500);                           // 延时 500ms
-}
-/* USER CODE END WHILE */
-```
+2. **验证 License：**
+   - 确认 Vivado 可以正常打开，无 License 报错
+   - ZYNQ7010 属于 WebPACK 免费支持范围，无需付费 License
 
-2. 编译工程 (Build)
-3. 连接 ST-Link，点击下载 (Download/Flash)
-4. 观察蓝pill板上的 LED 是否以 1Hz 频率闪烁 (亮 0.5s, 灭 0.5s)
+3. **测试创建工程：**
+   - 打开 Vivado → Create Project → 选择一个测试路径
+   - 在 Part 选择中搜索 "xc7z010"（ZYNQ7010 的型号）
+   - 确认能找到 `xc7z010clg400-1` 这个器件
 
 **预期结果 Expected Result:**
-- 编译成功，无错误
-- 下载成功后，LED 以约 1Hz 频率闪烁
+- Vivado 可正常启动，无 License 报错
+- 能在器件列表中找到 `xc7z010clg400-1`
 
 **常见问题 Common Issues:**
-- "编译错误：找不到头文件" -- 检查 CubeMX 生成的 Include Path 是否正确
-- "下载失败：No ST-Link detected" -- 检查接线和驱动，确认 ST-Link 指示灯亮
-- "LED 不亮" -- PC13 是低电平点亮，检查 GPIO 输出电平设置
+- "Vivado 启动很慢" -- 正常现象，Vivado 是大型 Java 应用，首次启动可能需要 1-2 分钟
+- "找不到 xc7z010 器件" -- 安装时可能没有勾选 ZYNQ 支持。在 Vivado Installer 中确认 "Zynq-7000" 系列被选中
+- "License 过期" -- 去 Xilinx 官网申请 WebPACK License（免费）
 
-### 任务 1.5: GPIO 深入与按键输入 (45 分钟)
-
-**为什么要学 GPIO？**
-
-GPIO (通用输入输出) 是 STM32 最基础的外设。在我们的示波器项目中：
-- ADC 采样引脚是 GPIO 的模拟输入模式
-- SPI 显示屏使用 GPIO 的复用功能模式
-- 按键控制使用 GPIO 的输入模式
-
-GPIO is the most fundamental peripheral of STM32. In our oscilloscope project:
-- ADC sampling pins use GPIO analog input mode
-- SPI display uses GPIO alternate function mode
-- Button control uses GPIO input mode
+### 任务 1.5: 认识 ZYNQ 核心板 (30 分钟)
 
 **步骤 Steps:**
 
-1. 在 CubeMX 中新增配置：PA0 设为 GPIO_Input (上拉输入)
-2. 修改代码，实现按键控制 LED 闪烁频率：
+1. **观察 ZYNQ 核心板：**
+   - 找到主芯片（通常有 Xilinx 标志，型号 "XC7Z010"）
+   - 找到 DDR3 内存芯片（通常在芯片背面）
+   - 找到 JTAG 调试接口（通常是 6 针或 10 针排针）
+   - 找到电源指示灯 (PWR LED)
+   - 找到用户 LED（通常连接到 PL 侧引脚）
+   - 找到用户按键（如果有的话）
 
-```c
-/* USER CODE BEGIN WHILE */
-uint32_t delay_ms = 500;  // 默认延时 500ms
+2. **阅读核心板原理图（向助教索取）：**
+   - 确认 JTAG 接口引脚定义：TCK, TMS, TDI, TDO, GND, VREF
+   - 确认用户 LED 连接的 PL 引脚编号
+   - 确认 MIO 引脚分配（PS 侧外设）
+   - 记录到你的实验日志中
 
-while (1)
-{
-    // 读取按键状态 (PA0)，按下时为低电平
-    if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_RESET)
-    {
-        delay_ms = 100;  // 按下时加速闪烁
-    }
-    else
-    {
-        delay_ms = 500;  // 松开时恢复正常
-    }
-
-    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-    HAL_Delay(delay_ms);
-}
-/* USER CODE END WHILE */
-```
-
-3. 面包板上连接一个按键到 PA0 (按键另一端接 GND)
-4. 下载测试，按下按键时 LED 闪烁加快
+3. **认识扩展底板（如果有）：**
+   - 找到 DAC (AD9744) 芯片位置
+   - 找到 LCD 触摸屏接口
+   - 找到 SMA/BNC 信号输出接口
+   - 找到电池接口和充电电路
+   - 找到电源开关
 
 **预期结果 Expected Result:**
-- 按键按下时 LED 闪烁加速 (100ms)
-- 松开时恢复正常 (500ms)
+- 能在核心板上指出主芯片、DDR3、JTAG 接口的位置
+- 记录了关键引脚编号（LED 引脚、JTAG 引脚）
+
+**常见问题 Common Issues:**
+- "核心板上芯片很小，看不到型号" -- 用手机放大镜功能或向助教确认
+- "找不到原理图" -- 向助教索取电子版，或者查看 TinyAWG 开源项目页面的硬件资料
+
+### 任务 1.6: JTAG 连接与硬件套件检查 (45 分钟)
+
+**什么是 JTAG？**
+
+JTAG (Joint Test Action Group) 是一种标准的调试接口，用于将比特流（bitstream）下载到 FPGA。你可以把它理解为电脑和 FPGA 之间的"数据线"——没有它，你就无法把设计好的电路"烧录"到 FPGA 中。
+
+JTAG is a standard debug interface used to download bitstreams to the FPGA. Think of it as the "data cable" between your computer and the FPGA — without it, you cannot "burn" your designed circuits into the FPGA.
+
+**步骤 Steps:**
+
+1. **连接 JTAG 下载器：**
+   - 将 JTAG 下载器（通常是 Xilinx Platform Cable 或兼容产品）连接到核心板的 JTAG 接口
+   - 注意引脚对应关系：
+     - VTREF → JTAG 接口的 VREF
+     - TCK → TCK
+     - TMS → TMS
+     - TDI → TDI
+     - TDO → TDO
+     - GND → GND
+   - **务必在断电状态下连接！**
+
+2. **上电测试：**
+   - 给核心板上电（USB 或外接电源）
+   - 确认电源指示灯亮起
+   - 连接 JTAG 下载器的 USB 端到电脑
+
+3. **Vivado 中识别器件：**
+   - 打开 Vivado → Open Hardware Manager
+   - 点击 "Open target" → "Auto Connect"
+   - 确认能看到 ZYNQ 器件（xc7z010）
+   - 截图保存
+
+4. **硬件清单最终检查：**
+
+   | 物品 Item | 数量 Qty | 检查 Check |
+   |----------|---------|-----------|
+   | ZYNQ7010 核心板 | 1 | □ |
+   | JTAG 下载器 | 1 | □ |
+   | USB 数据线 | 2 | □ |
+   | 2.8" 触摸屏模块 | 1 | □ |
+   | SMA/BNC 输出接口 | 1 | □ |
+   | 锂电池 | 1 | □ |
+   | 杜邦线若干 | 1套 | □ |
+   | 面包板 | 1 | □ |
+   | 万用表 | 1 | □ |
+
+**预期结果 Expected Result:**
+- Vivado Hardware Manager 能识别到 ZYNQ 器件
+- 硬件清单全部核对完毕
+
+**常见问题 Common Issues:**
+- "Hardware Manager 找不到器件" -- 检查 JTAG 接线是否正确，确认下载器驱动已安装，检查核心板是否已上电
+- "下载器指示灯不亮" -- 更换 USB 线（确认是数据线不是充电线），更换 USB 口
+- "识别到器件但显示未知" -- 可能需要安装 cable driver，在 Vivado 安装目录中找到 `install_drivers` 并运行
 
 ---
 
 ## 今日作业 | Homework
 
-1. **画图题：** 在实验日志中画出示波器的工作流程图，标注每个环节的功能
-2. **计算题：** 如果 ADC 采样率是 1Msps，采样深度是 1024 个点，满屏显示需要多少时间？
-   (提示：时间 = 点数 / 采样率 = 1024 / 1000000 = 1.024ms)
-3. **思考题：** 为什么 STM32 内置 ADC 只有 12-bit？如果想要更高精度怎么办？
+1. **画图题：** 在实验日志中画出 TinyAWG 的完整系统框图，标注 PS、PL、DAC、运放、显示等模块，用箭头标出数据流方向
+2. **计算题：** TinyAWG 的 DDS 使用 32 位相位累加器，时钟频率 200MHz。请计算：
+   - (a) 频率分辨率是多少？（提示：200MHz / 2^32）
+   - (b) 要输出 5MHz 正弦波，FCW 应设为多少？
+   - (c) 要输出 440Hz（标准 A 音），FCW 应设为多少？
+3. **思考题：** 为什么 TinyAWG 的带宽（35MHz）小于采样率的一半（100MHz）？实际中还有哪些因素限制了带宽？
 4. **写实验日志：** 按照 `assignments/` 目录的要求，写第一篇实验日志
 
 ---
 
 ## 明日预告 | Tomorrow's Preview
 
-明天我们将学习运算放大器电路——这是示波器的"耳朵"，负责把外界信号"听"清楚并放大到合适的大小。你将亲手在面包板上搭建放大电路！
+明天我们将正式进入 Vivado 工程！你将创建第一个 ZYNQ Block Design，配置 ARM 处理器系统（PS），并让 FPGA 上的 LED 亮起来。这是从"纸上谈兵"到"实战操作"的关键一步！
 
-Tomorrow we will learn about op-amp circuits -- the "ears" of the oscilloscope, responsible for listening to external signals clearly and amplifying them to the right level. You will build amplifier circuits on a breadboard!
+Tomorrow we will dive into Vivado! You will create your first ZYNQ Block Design, configure the ARM Processing System (PS), and light up an LED on the FPGA. This is the critical step from "theory" to "hands-on practice"!
 
 ---
 
@@ -250,13 +379,14 @@ Tomorrow we will learn about op-amp circuits -- the "ears" of the oscilloscope, 
 
 | 资源 Resource | 类型 Type | 链接 Link |
 |--------------|----------|----------|
-| 示波器原理演示 | B站视频 | https://www.bilibili.com/video/BV174411h7bn/ |
-| 如何用示波器的触发捕捉波形 | B站视频 | https://www.bilibili.com/video/BV1HRVRz3EyK/ |
-| STM32CubeMX 安装教程 | B站搜索 | 搜索"STM32CubeMX 安装 教程" |
-| STM32F103 参考手册 | PDF | st.com 下载 RM0008 |
-| 蓝pill板引脚图 | 图片 | 搜索"STM32 blue pill pinout" |
+| TinyAWG 开源项目 | 立创开源 | https://oshwhub.com/greentor/tinyawg-signal-source |
+| DDS 原理详解 | B站视频 | 搜索"DDS 直接数字频率合成 教程" |
+| ZYNQ 架构简介 | B站视频 | 搜索"ZYNQ PS PL 架构 入门" |
+| Vivado 安装教程 | B站视频 | 搜索"Vivado 安装教程 ZYNQ" |
+| AD9744 数据手册 | PDF | 在 analog.com 搜索 AD9744 |
+| ZYNQ7010 数据手册 | PDF | 在 xilinx.com 搜索 ds187 |
 
 ---
 
-*最后更新：2026-05-26*
-*Last updated: 2026-05-26*
+*最后更新：2026-05-27*
+*Last updated: 2026-05-27*

@@ -2,9 +2,9 @@
 
 ## 概述 | Overview
 
-本清单列出口袋示波器项目所需的所有物料。总预算控制在 500 元以内。
+本清单列出口袋信号发生器 TinyAWG 项目所需的所有物料。总预算约 220 元，远低于 500 元上限。
 
-This BOM lists all materials needed for the Pocket Oscilloscope project. Total budget is under 500 yuan.
+This BOM lists all materials needed for the TinyAWG Pocket Signal Generator project. Total budget is approximately 220 yuan, well under the 500 yuan limit.
 
 ---
 
@@ -12,48 +12,64 @@ This BOM lists all materials needed for the Pocket Oscilloscope project. Total b
 
 | 序号 | 部件名称 Component | 规格型号 Specification | 数量 | 参考价格 | 购买建议 Source | 优先级 |
 |------|-------------------|----------------------|------|---------|---------------|--------|
-| 1 | STM32F103C8T6 最小系统板 | 蓝pill板, ARM Cortex-M3, 72MHz | 1 | 8 元 | 淘宝搜索"蓝pill STM32F103" | 必需 |
-| 2 | ST7789 TFT 显示屏 | 1.8寸 IPS, 160x128, SPI 接口 | 1 | 25 元 | 淘宝搜索"ST7789 1.8寸 TFT SPI" | 必需 |
-| 3 | LM358 运算放大器 | DIP-8 双运放 | 2 | 2 元 | 淘宝/嘉立创商城 | 必需 |
-| 4 | AD9833 DDS 信号发生器模块 | 含 25MHz 晶振, SPI 接口 | 1 | 15 元 | 淘宝搜索"AD9833 DDS 模块" | 可选 |
+| 1 | ZYNQ7010 核心板 | XC7Z010, PS+PL, 512MB DDR3 | 1 | 60 元 | 立创开源打样 (参考 z_star 核心板) | 必需 |
+| 2 | 2.8" IPS LCD 显示屏 | 含触摸 (FT6336), SPI/并口 | 1 | 63 元 | 淘宝搜索"2.8寸 IPS 触摸屏" | 必需 |
+| 3 | 锂电池 | 3.7V, 1500mAh, 聚合物 | 1 | 20 元 | 淘宝搜索"3.7V 聚合物锂电池" | 必需 |
+
+## 模拟器件 | Analog Components
+
+| 序号 | 部件名称 | 规格型号 | 数量 | 参考价格 | 说明 |
+|------|---------|---------|------|---------|------|
+| 4 | 高速 DAC | AD9744, 14-bit, 210MSPS | 1 | 10 元 | 主波形输出 DAC |
+| 5 | 双通道运放 | OPA2673IRGVT, 高速 | 1 | 6 元 | 输出级放大器 |
+| 6 | 辅助 DAC | DAC8562SDGSR, 16-bit 双通道 | 1 | 7 元 | 幅度和偏置控制 |
+| 7 | 信号继电器 | 高频 RF 继电器 | 2 | 16 元 | 输出通道切换 |
+| 8 | MCX 母座 | 射频连接器, 50Ω | 4 | 8 元 | 信号输出接口 |
+
+## 电源器件 | Power Components
+
+| 序号 | 部件名称 | 规格型号 | 数量 | 参考价格 | 说明 |
+|------|---------|---------|------|---------|------|
+| 9 | DCDC 转换器 | LMR544006, 正负电源 | 2 | 6 元 | 产生 ±6.5V 电源轨 |
+| 10 | 宽电压充电 IC | 锂电池充电管理 | 1 | 3 元 | 支持 5-12V 输入 |
+| 11 | 升压芯片 | 5V→12V 升压转换 | 1 | 2 元 | 为 DCDC 提供输入 |
+| 12 | MOSFET | 背靠背路径管理 | 2 | 2 元 | 电池/外部电源切换 |
+| 13 | 电感 | 配合 DCDC 使用 | 4 | 2 元 | 滤波和储能 |
+| 14 | CH221K | PD 诱骗芯片 | 1 | 1 元 | Type-C 12V PD 协商 |
+
+## 数字器件 | Digital Components
+
+| 序号 | 部件名称 | 规格型号 | 数量 | 参考价格 | 说明 |
+|------|---------|---------|------|---------|------|
+| 15 | 电量计 IC | MAX17048, I2C | 1 | 3 元 | 电池 SOC 监测 |
+| 16 | 触摸 IC | FT6336, I2C 电容触摸 | 1 | 3 元 | (通常含在 LCD 模块中) |
+| 17 | RGB LED | WS2812, 单线控制 | 1 | 1 元 | 状态指示 |
+| 18 | Type-C 母座 | 16Pin, 带 USB 2.0 | 1 | 2 元 | 供电 + 串口通信 |
+| 19 | 板对板连接器 | 核心板接口, 一对 | 1 对 | 9 元 | 连接 ZYNQ 核心板 |
 
 ## 被动元件 | Passive Components
 
 | 序号 | 部件名称 | 规格 | 数量 | 参考价格 | 说明 |
 |------|---------|------|------|---------|------|
-| 5 | 电阻 10kΩ | 1/4W, 5% | 10 | 2 元 | 分压/偏置/上下拉 |
-| 6 | 电阻 1kΩ | 1/4W, 5% | 10 | 2 元 | 限流/反馈 |
-| 7 | 电阻 100kΩ | 1/4W, 5% | 5 | 1 元 | 输入阻抗 |
-| 8 | 电阻 47kΩ | 1/4W, 5% | 5 | 1 元 | 放大电路 |
-| 9 | 电阻 22kΩ | 1/4W, 5% | 5 | 1 元 | 反相放大 |
-| 10 | 电容 100nF (0.1uF) | 瓷片电容 | 10 | 2 元 | 去耦/旁路 |
-| 11 | 电容 10uF | 电解电容, 16V | 5 | 2 元 | 隔直/滤波 |
-| 12 | 电容 100uF | 电解电容, 16V | 2 | 1 元 | 电源滤波 |
+| 20 | 电阻 (各值) | 0402/0603, 10Ω~1MΩ | 若干 | 5 元 | 分压/偏置/反馈/上下拉 |
+| 21 | 电容 (各值) | 0402/0603, 10pF~10uF | 若干 | 5 元 | 去耦/旁路/滤波 |
+| 22 | 大容量电容 | 电解/钽电容, 47uF~100uF | 4 | 3 元 | 电源滤波 |
+| 23 | 二极管 | 肖特基/稳压 | 5 | 2 元 | 保护/整流 |
 
 ## 连接与结构 | Connectors & Structure
 
 | 序号 | 部件名称 | 规格 | 数量 | 参考价格 | 说明 |
 |------|---------|------|------|---------|------|
-| 13 | 面包板 | 830 孔 | 1 | 8 元 | 原型验证 |
-| 14 | 杜邦线 | 公对公 20cm, 40根 | 1 套 | 5 元 | 连线 |
-| 15 | 杜邦线 | 公对母 20cm, 40根 | 1 套 | 5 元 | 连线 |
-| 16 | Micro-USB 数据线 | 数据线(非充电线) | 1 | 5 元 | 供电+串口 |
-| 17 | BNC 母座 | PCB 焊接型 | 1 | 3 元 | 信号输入接口(可选) |
-| 18 | 轻触按键 | 6x6mm, 四脚 | 4 | 2 元 | 功能切换 |
-
-## 工具与烧录 | Tools & Programming
-
-| 序号 | 部件名称 | 规格 | 数量 | 参考价格 | 说明 |
-|------|---------|------|------|---------|------|
-| 19 | ST-Link V2 | 下载调试器 | 1 | 10 元 | 程序烧录 |
-| 20 | AMS1117-3.3V 模块 | 稳压模块 | 1 | 5 元 | 3.3V 稳压电源 |
+| 24 | 排针/排母 | 2.54mm, 各种长度 | 若干 | 3 元 | 调试接口 |
+| 25 | 螺丝 | M2/M2.5, 不锈钢 | 若干 | 2 元 | 外壳固定 |
+| 26 | 铜螺柱 | M2/M2.5, 尼龙或铜 | 4 | 2 元 | PCB 支撑 |
 
 ## PCB 与外壳 | PCB & Enclosure
 
 | 序号 | 部件名称 | 规格 | 数量 | 参考价格 | 说明 |
 |------|---------|------|------|---------|------|
-| 21 | PCB 打板 | 嘉立创, 2层, 50x80mm | 5片 | 5 元 | jlcpcb.com |
-| 22 | 3D 打印外壳 | PLA 材质 | 1 | 30 元 | 学校打印机或淘宝代打 |
+| 27 | PCB 打板 | 嘉立创, 4层, HASL | 5 片 | 30 元 | 使用开源 PCB 文件 |
+| 28 | 3D 打印外壳 | 树脂材料, 黑色 | 1 套 | 50 元 | 嘉立创 3D 打印 |
 
 ---
 
@@ -61,17 +77,19 @@ This BOM lists all materials needed for the Pocket Oscilloscope project. Total b
 
 | 类别 Category | 金额 Amount |
 |-------------|-----------|
-| 核心模块 Core Modules | ~50 元 |
-| 被动元件 Passives | ~12 元 |
-| 连接与结构 Connectors | ~28 元 |
-| 工具 Tools | ~15 元 |
-| PCB 与外壳 PCB & Case | ~35 元 |
-| **总计 Total** | **~140 元** |
+| 核心模块 Core Modules | ~143 元 |
+| 模拟器件 Analog Components | ~47 元 |
+| 电源器件 Power Components | ~16 元 |
+| 数字器件 Digital Components | ~18 元 |
+| 被动元件 Passives | ~15 元 |
+| 连接与结构 Connectors | ~7 元 |
+| PCB 与外壳 PCB & Case | ~80 元 |
+| **总计 Total** | **~220 元** (不含核心板约160元) |
 | **预算上限 Budget Limit** | **500 元** |
-| **剩余余量 Margin** | **~360 元** |
+| **剩余余量 Margin** | **~280 元** |
 
-> 余量可用于：购买万用表（~50元）、备用元件、升级高分辨率显示屏、购买焊接工具等。
-> Remaining budget can be used for: multimeter (~50 yuan), spare parts, higher-resolution display upgrade, soldering tools, etc.
+> 余量可用于：购买 JTAG 调试器、备用元件、焊接工具、升级屏幕等。
+> Remaining budget can be used for: JTAG debugger, spare parts, soldering tools, display upgrade, etc.
 
 ---
 
@@ -79,11 +97,13 @@ This BOM lists all materials needed for the Pocket Oscilloscope project. Total b
 
 | 时间 | 采购内容 | 原因 |
 |------|---------|------|
-| 课程前 7~10 天 | 核心模块 + 被动元件 + 连接件 | 留出快递时间 |
-| 课程前 3~5 天 | 工具 + ST-Link | 确保课程前到货 |
+| 课程前 14 天 | ZYNQ 核心板 (立创打样) | 核心板打样周期较长 |
+| 课程前 10 天 | PCB 打板下单 (使用开源文件) | 嘉立创 4 层板约 3-5 天 |
+| 课程前 10 天 | LCD 显示屏、电池、模拟芯片 | 留出快递时间 |
+| 课程前 7 天 | 被动元件、连接器、电源芯片 | 补齐物料 |
+| 课程前 5 天 | JTAG 调试器、焊接工具 | 确保到货 |
 | Day 3~4 | 确认所有物料到齐 | 有问题可及时补购 |
-| Day 10 | PCB 打板下单 | 3~5 天到货 |
-| Day 11 | 3D 打印 (如有条件) | 提前打印 |
+| Day 10 前 | 3D 打印外壳下单 | 提前打印 |
 
 ---
 
@@ -91,13 +111,26 @@ This BOM lists all materials needed for the Pocket Oscilloscope project. Total b
 
 | 原器件 | 替代品 | 价格 | 说明 |
 |--------|-------|------|------|
-| LM358 | MCP6002 | 3 元 | 轨到轨运放，性能更好 |
-| ST7789 1.8寸 | SSD1306 0.96寸 OLED | 8 元 | 单色，但更便宜、更简单 |
-| ST7789 1.8寸 | ILI9341 2.4寸 TFT | 15 元 | 更大屏幕，分辨率更高 |
-| STM32F103 蓝pill | STM32F411 黑pill | 18 元 | 更高性能，双 ADC |
-| AD9833 模块 | XR2206 信号发生器 | 10 元 | 模拟信号发生器，精度略低 |
+| ZYNQ7010 | ZYNQ7020 | 80-100 元 | 兼容，需改 Vivado 芯片选择，性能更强 |
+| 2.8" IPS LCD | 3.2" IPS LCD | 70 元 | 更大屏幕，可能需要改驱动 |
+| AD9744 | AD9742 | 8 元 | 12-bit 版本，精度略低 |
+| OPA2673 | THS3095 | 5 元 | 替代高速运放 |
+| WS2812 | 普通 LED | 0.5 元 | 简化方案，无 RGB 效果 |
 
 ---
 
-*最后更新：2026-05-26*
-*Last updated: 2026-05-26*
+## 重要采购说明 | Important Purchase Notes
+
+1. **ZYNQ 核心板**：推荐使用立创开源项目 (z_star) 的设计文件自行打样，也可在淘宝搜索"ZYNQ7010 核心板"购买兼容板。
+2. **PCB 文件**：从 TinyAWG 开源项目 (OSHWhub) 下载 PCB 设计文件，直接提交给嘉立创打板。
+3. **LCD 屏幕**：确保购买的屏幕型号与开源项目中使用的匹配（含 FT6336 触摸 IC）。
+4. **电池**：建议使用带保护板的聚合物锂电池，注意安全。
+5. **调试器**：需要 Xilinx JTAG 调试器（Platform Cable 或兼容产品），用于 FPGA 比特流和 ARM 固件下载。
+
+> 注意：本项目使用较多贴片元件 (SMD)，需要焊接技能。建议提前准备热风枪和焊锡膏。
+> Note: This project uses many SMD components. Soldering skills and tools (hot air station, solder paste) are recommended.
+
+---
+
+*最后更新：2026-05-27*
+*Last updated: 2026-05-27*
