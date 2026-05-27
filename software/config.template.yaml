@@ -1,0 +1,66 @@
+# 口袋示波器配置模板
+# Pocket Oscilloscope Configuration Template
+#
+# 使用方法：复制此文件为 config.yaml，根据实际硬件修改参数
+# Usage: Copy this file as config.yaml and modify parameters for your hardware
+
+# === 串口配置 | Serial Configuration ===
+serial:
+  port: "COM3"              # 串口号 (Windows: COM3, Linux: /dev/ttyUSB0)
+  baudrate: 115200           # 波特率 | Baud rate
+  timeout: 2                 # 读取超时 (秒) | Read timeout (seconds)
+
+# === ADC 配置 | ADC Configuration ===
+adc:
+  resolution: 12             # ADC 分辨率 (bit) | ADC resolution
+  vref: 3.3                  # 参考电压 (V) | Reference voltage
+  sample_count: 1024         # 采样点数 | Sample count
+  sample_rate: 1000000       # 采样率 (Hz) | Sample rate
+
+# === 显示配置 | Display Configuration ===
+display:
+  width: 160                 # 屏幕宽度 (像素) | Screen width (pixels)
+  height: 128                # 屏幕高度 (像素) | Screen height (pixels)
+  grid_div_x: 8              # 水平网格数 | Horizontal divisions
+  grid_div_y: 6              # 垂直网格数 | Vertical divisions
+
+# === 触发配置 | Trigger Configuration ===
+trigger:
+  mode: "auto"               # 触发模式: auto, normal, single
+  slope: "rising"            # 触发边沿: rising, falling
+  level: 0                   # 触发电平 (0=自动) | Trigger level (0=auto)
+  holdoff_ms: 100            # 释抑时间 (ms) | Holdoff time
+
+# === 时基配置 | Timebase Configuration ===
+timebase:
+  current_level: 1           # 当前档位 (0~7) | Current level
+  levels:                    # 时基档位表 | Timebase level table
+    - { label: "10us/div",  sample_rate: 1000000 }
+    - { label: "20us/div",  sample_rate: 1000000 }
+    - { label: "50us/div",  sample_rate: 400000 }
+    - { label: "100us/div", sample_rate: 200000 }
+    - { label: "200us/div", sample_rate: 100000 }
+    - { label: "500us/div", sample_rate: 40000 }
+    - { label: "1ms/div",   sample_rate: 20000 }
+    - { label: "10ms/div",  sample_rate: 2000 }
+
+# === 信号发生器配置 | Signal Generator Configuration ===
+signal_gen:
+  enabled: true              # 是否启用信号发生器
+  default_freq: 1000         # 默认频率 (Hz) | Default frequency
+  default_waveform: "sine"   # 默认波形: sine, triangle, square
+  freq_presets:              # 预设频率列表 | Frequency presets
+    - 100
+    - 500
+    - 1000
+    - 2000
+    - 5000
+    - 10000
+    - 50000
+    - 100000
+
+# === 日志配置 | Logging Configuration ===
+logging:
+  level: "INFO"              # 日志级别: DEBUG, INFO, WARNING, ERROR
+  save_waveforms: true       # 是否保存波形数据
+  waveform_dir: "waveforms"  # 波形保存目录

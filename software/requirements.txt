@@ -1,0 +1,10 @@
+# 口袋示波器 PC 端工具依赖
+# Pocket Oscilloscope PC Tool Dependencies
+#
+# 安装方法：pip install -r requirements.txt
+# Install: pip install -r requirements.txt
+
+pyserial>=3.5          # 串口通信 | Serial communication
+matplotlib>=3.5.0      # 波形绘图 | Waveform plotting
+numpy>=1.21.0          # 数值计算 | Numerical computation
+PyYAML>=6.0            # 配置文件解析 | Config file parsing
