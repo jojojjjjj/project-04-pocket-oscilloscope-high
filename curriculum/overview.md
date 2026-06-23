@@ -2,30 +2,29 @@
 
 ## 项目名称 | Project Name
 
-口袋信号发生器 "TinyAWG" | Pocket Signal Generator "TinyAWG"
+口袋信号发生器 "WavePocket" | Pocket Signal Generator "WavePocket"
 
-> 开源参考：https://oshwhub.com/greentor/tinyawg-signal-source
+> 开源参考：https://oshwhub.com/greentor/tinyawg-signal-source （演示视频 BV1a42QBUECC）
 
 ## 课程定位 | Course Positioning
 
-本课程是面向高中生的全日制暑期实践项目，为期 12 天（每天 6~8 小时），通过亲手打造一台口袋任意波形发生器（AWG），系统学习 ZYNQ SoC 架构、FPGA 数字设计、DDS 信号合成、嵌入式软件开发和 LVGL GUI 五大核心领域。
+本课程是面向高中生的全日制暑期实践项目，为期 20 天（每天 6~8 小时），通过亲手打造一台口袋任意波形发生器（AWG），系统学习 FPGA 数字设计、Verilog、DDS 信号合成、DAC 驱动和显示交互四大核心领域。主线方案用 **iCE40 FPGA 开发板 + 现成模块**（DAC904 模块 + ST7735 TFT + EC11 编码器），跟着教程跑通，不用画板、不用焊贴片。
 
-This is a full-time summer practicum course for high school students, spanning 12 days (6-8 hours per day). By building a pocket Arbitrary Waveform Generator (AWG) from scratch, students will systematically learn five core areas: ZYNQ SoC architecture, FPGA digital design, DDS signal synthesis, embedded software development, and LVGL GUI.
+This is a full-time summer practicum course for high school students, spanning 20 days (6-8 hours per day). By building a pocket Arbitrary Waveform Generator (AWG) from scratch, students will systematically learn four core areas: FPGA digital design, Verilog, DDS signal synthesis, DAC driving, and display/interaction. The main-line plan uses an **iCE40 FPGA dev board + off-the-shelf modules** (DAC904 module + ST7735 TFT + EC11 encoder), following tutorials to get it running -- no PCB design, no SMD soldering.
 
-### TinyAWG 核心参数 | TinyAWG Key Specs
+### WavePocket 核心参数 | WavePocket Key Specs
 
 | 参数 Parameter | 规格 Specification |
 |--------------|-------------------|
-| 主控 SoC | Xilinx ZYNQ-7010 (ARM Cortex-A9 PS + Artix-7 FPGA PL) |
-| DAC | AD9744, 14-bit, 200 MSa/s |
-| 输出带宽 | 35 MHz |
-| 输出幅度 | 10 Vpp |
-| 输出运放 | OPA2673 双通道高速运放 |
-| 辅助 DAC | DAC8562 (16-bit, 双通道, 用于偏置/增益控制) |
-| 显示 | 2.8" TFT 触摸屏, FT6336 触控 IC |
-| GUI 框架 | LVGL 8.3.1 |
-| 供电 | 内置锂电池 |
-| 参考成本 | ~220 元 |
+| 主控 FPGA | Lattice iCE40 (HX8K / UP5K) |
+| DAC | DAC904, 14-bit, 高速并行 DAC 模块 |
+| 输出带宽 | ~10 MHz |
+| 输出幅度 | 可调 (运放模块调理) |
+| 显示 | 1.8" SPI TFT (ST7735), 128×160 |
+| 交互输入 | EC11 旋转编码器 (选波形/调频/切菜单) |
+| 波形查找表 | 1024 点 BRAM LUT (正弦/方波/三角/锯齿) |
+| 工具链 | Yosys + nextpnr + IceStorm (全开源免费) |
+| 参考成本 | ~178 元 (全部现成开发板+模块) |
 
 ## 学习目标 | Learning Objectives
 
@@ -34,62 +33,78 @@ This is a full-time summer practicum course for high school students, spanning 1
 Upon completing this course, students will be able to:
 
 1. **理解 AWG 工作原理** -- 掌握 DDS（直接数字频率合成）原理、相位累加器、查找表、DAC 重建滤波等核心概念
-2. **理解 ZYNQ SoC 架构** -- 了解 PS（Processing System, ARM）与 PL（Programmable Logic, FPGA）的分工协作模型
-3. **掌握 FPGA 设计基础** -- 能使用 Verilog 编写组合逻辑与时序逻辑模块，完成综合与实现流程
+2. **理解 FPGA 与 Verilog 基础** -- 了解 FPGA 如何用硬件逻辑并行执行任务，能用 Verilog 写组合逻辑与时序逻辑模块
+3. **掌握 FPGA 设计流程** -- 用开源工具链（Yosys 综合 → nextpnr 布局布线 → iceprog 烧录）把 Verilog 变成跑在 iCE40 上的比特流
 4. **实现 DDS 信号合成** -- 在 FPGA 中构建相位累加器与波形查找表，输出正弦波、方波、三角波、锯齿波
-5. **编写 ARM 嵌入式软件** -- 使用 Vitis IDE 开发 PS 端 C 程序，通过 AXI 总线控制 PL 端 IP 核
-6. **开发 LVGL 图形界面** -- 使用 LVGL 8.3.1 构建触摸交互界面，实现参数调节与波形预览
-7. **完成 PCB 组装与调试** -- 焊接贴片元件，调试模拟输出通路（DAC + 运放 + 滤波）
-8. **撰写技术文档** -- 编写清晰的 README、系统架构图、寄存器说明和项目报告
+5. **驱动 DAC 输出模拟波形** -- 理解 DAC904 并行接口时序，把数字波形变成示波器能看见的真实电压
+6. **实现显示与交互** -- 用 ST7735 TFT 显示当前波形和频率，用 EC11 编码器选波形、调频率
+7. **完成整机集成与调试** -- 开发板+模块整机接线、电源检查、分层调试，让示波器上出现干净的波形
+8. **撰写技术文档** -- 编写清晰的 README、系统框图、调试笔记和项目报告
 
-## 三阶段课程结构 | Three-Phase Structure
+## 四阶段课程结构 | Four-Phase Structure
 
-### 阶段一 Phase 1：数字系统基础与 FPGA | Digital System & FPGA Fundamentals (Day 1-4)
-
-| 天数 | 主题 | 核心知识点 | 关键产出 |
-|------|------|-----------|---------|
-| Day 1 | 项目启动与 ZYNQ 架构 | AWG 原理、ZYNQ PS/PL 架构、Vivado 开发环境搭建 | Vivado 环境就绪，理解 PS/PL 关系 |
-| Day 2 | 数字逻辑与 Verilog 基础 | 布尔代数、组合逻辑、时序逻辑、Verilog 语法 | LED 闪烁、按键消抖、多路选择器 |
-| Day 3 | FPGA 设计流程 | Vivado 工程、约束文件 (XDC)、综合、实现、Bitstream 生成 | 在 PL 端运行第一个自定义模块 |
-| Day 4 | DDS 原理与 FPGA 实现 | 相位累加器、波形查找表 (LUT)、频率控制字 (FTW)、DAC 接口 | FPGA 输出正弦波数据，逻辑分析仪验证 |
-
-**阶段目标：** 学生理解 ZYNQ 架构，能用 Verilog 在 PL 端实现 DDS 核心逻辑，并通过仿真验证波形数据。
-**Phase Goal:** Students understand the ZYNQ architecture, implement DDS core logic in the PL side using Verilog, and verify waveform data through simulation.
-
-### 阶段二 Phase 2：嵌入式软件与 GUI | Embedded Software & GUI (Day 5-8)
+### 阶段一 Phase 1：FPGA 基础 | FPGA Basics (Day 1-5)
 
 | 天数 | 主题 | 核心知识点 | 关键产出 |
 |------|------|-----------|---------|
-| Day 5 | ARM PS 开发入门 | Vitis IDE、 standalone BSP、UART 调试、GPIO 控制 | PS 端程序运行，串口输出调试信息 |
-| Day 6 | AXI 总线与 PS-PL 通信 | AXI4-Lite IP 核封装、地址映射、寄存器读写 | PS 通过 AXI 控制 PL 端 DDS 参数 |
-| Day 7 | LVGL 图形框架入门 | LVGL 8.3.1 移植、显示驱动、触摸驱动 FT6336、基础控件 | 屏幕显示文字与按钮，触摸响应 |
-| Day 8 | 完整 GUI 开发 | 波形参数界面、频率/幅度滑块、波形类型选择、实时预览 | 完整交互界面，可设置波形参数 |
+| Day 1 | 项目启动与 AWG 原理 | AWG 工作原理、DDS 概念、iCE40 开发板认识 | 理解 DDS 流程图，开发板点亮 |
+| Day 2 | 开发环境与 Verilog 入门 | Yosys/nextpnr/IceStorm 安装、Verilog 语法 | LED 闪烁工程跑通 |
+| Day 3 | 组合与时序逻辑 | 布尔代数、组合逻辑、时序逻辑、按键消抖 | 多路选择器、消抖模块 |
+| Day 4 | FPGA 设计流程 | 约束文件 (.pcf)、综合、布局布线、烧录 | 在 iCE40 上跑第一个自定义模块 |
+| Day 5 | DDS 原理与相位累加器 | 相位累加器、频率控制字 (FTW)、BRAM 查找表 | FPGA 输出数字波形，仿真验证 |
 
-**阶段目标：** 学生能在 PS 端运行嵌入式程序，通过 AXI 总线控制 PL 端 FPGA 逻辑，并在触摸屏上构建完整的用户界面。
-**Phase Goal:** Students can run embedded programs on the PS side, control PL-side FPGA logic through the AXI bus, and build a complete user interface on the touchscreen.
+**阶段目标：** 学生理解 FPGA 与 DDS 原理，能用 Verilog 在 iCE40 上实现 DDS 核心逻辑，并通过仿真验证波形数据。
+**Phase Goal:** Students understand FPGA and DDS principles, implement DDS core logic on iCE40 using Verilog, and verify waveform data through simulation.
 
-### 阶段三 Phase 3：系统集成与展示 | System Integration & Presentation (Day 9-12)
+### 阶段二 Phase 2：DDS 核心 | DDS Core (Day 6-10)
 
 | 天数 | 主题 | 核心知识点 | 关键产出 |
 |------|------|-----------|---------|
-| Day 9 | 模拟输出通路与 DAC 调试 | AD9744 SPI 驱动、OPA2673 运放电路、重建滤波器、DAC8562 偏置控制 | 示波器验证模拟波形输出 |
-| Day 10 | PCB 焊接与系统联调 | 贴片焊接技巧、信号完整性检查、电源纹波测量、全链路调试 | 完整硬件组装，系统可运行 |
-| Day 11 | 性能优化与功能完善 | 输出校准（频率精度、幅度精度）、附加波形（ARB）、故障排除 | 校准完成，功能完善 |
-| Day 12 | 项目展示与总结 | 演示技巧、技术复盘、项目文档完善、Demo 网站发布 | 最终展示，项目报告 |
+| Day 6 | 波形查找表 | 用 Python 生成正弦/方波/三角/锯齿 LUT，BRAM 存储 | 多波形 LUT 生成脚本 |
+| Day 7 | DAC904 驱动 | 并行 DAC 接口时序、数据格式、示波器验证 | 示波器看到真实模拟波形 |
+| Day 8 | 完整 DDS 顶层模块 | dds_top 整合、多波形切换、仿真验证 | dds_top 跑通，多波形切换 |
+| Day 9 | 输出幅度调理 | 运放模块接线、幅度/偏置调节 | 输出幅度可调 |
+| Day 10 | 频率精度与扫频 | FCW 计算、扫频实现、频率测量对比 | 频率精度达标，扫频可用 |
 
-**阶段目标：** 学生完成完整硬件组装与系统联调，实现校准后的波形输出，并进行项目展示。
-**Phase Goal:** Students complete full hardware assembly and system integration, achieve calibrated waveform output, and present the project.
+**阶段目标：** 学生能让 FPGA 通过 DAC 输出真实模拟波形，并理解频率控制与扫频的实现。
+**Phase Goal:** Students can make the FPGA output real analog waveforms through the DAC, and understand frequency control and sweep implementation.
+
+### 阶段三 Phase 3：交互显示 | Display & Control (Day 11-15)
+
+| 天数 | 主题 | 核心知识点 | 关键产出 |
+|------|------|-----------|---------|
+| Day 11 | ST7735 TFT 驱动 | SPI 时序、显示文字/简单图形 | 屏幕显示文字 |
+| Day 12 | TFT 显示波形信息 | 显示当前波形类型和频率值 | 屏幕同步显示波形状态 |
+| Day 13 | EC11 旋转编码器 | 编码器正交解码、消抖 | 编码器读数稳定 |
+| Day 14 | 编码器调参交互 | 旋转选波形、调频率，按压切菜单 | 编码器可改波形和频率 |
+| Day 15 | 显示与 DDS 联动 | 屏幕显示与输出波形同步 | 屏幕与输出一致 |
+
+**阶段目标：** 学生能驱动 TFT 显示和编码器交互，实现"选波形/调频率"的完整人机交互。
+**Phase Goal:** Students can drive the TFT display and encoder interaction, achieving full "pick waveform / tune frequency" interaction.
+
+### 阶段四 Phase 4：系统集成与展示 | Integration & Presentation (Day 16-20)
+
+| 天数 | 主题 | 核心知识点 | 关键产出 |
+|------|------|-----------|---------|
+| Day 16 | 整机接线与联调 | 开发板+模块整机连线、电源检查、分层调试 | 整机可运行 |
+| Day 17 | 系统测试与校准 | 频率/幅度校准、故障排除 | 校准完成，波形干净 |
+| Day 18 | （可选）外壳与装配 | 3D 打印外壳、整机装配 (stretch) | 装壳完成（可选） |
+| Day 19 | 文档与 Demo 网站 | README、架构图、Demo 网站 | 文档完整 |
+| Day 20 | 项目展示与答辩 | 演示技巧、技术复盘、技术答辩 | 最终展示 |
+
+**阶段目标：** 学生完成整机集成与校准，撰写文档，并进行项目展示。
+**Phase Goal:** Students complete full system integration and calibration, write documentation, and present the project.
 
 ## 课程时间表 | Course Timeline
 
 ```
-Day  1  2  3  4  5  6  7  8  9  10 11 12
-     |----- Phase 1 -----|----- Phase 2 -----|----- Phase 3 -----|
-     数字基础+FPGA          嵌入式软件+GUI        系统集成+展示
-     Digital+FPGA           Embedded+GUI          Integration+Demo
-         |                     |                     |
-      Day 4: DDS           Day 6: AXI通信       Day 9: 模拟输出
-      FPGA验证成功          PS控制PL成功           示波器验证波形
+Day  1  2  3  4  5   6  7  8  9  10   11 12 13 14 15   16 17 18 19 20
+     |-- Phase 1 --|-- Phase 2 --|-- Phase 3 --|-- Phase 4 --|
+     FPGA 基础       DDS 核心       交互显示       集成与展示
+     FPGA Basics     DDS Core       Display/Ctrl   Integration
+        |               |              |               |
+     Day 5: DDS      Day 7: DAC     Day 14: 编码器   Day 17: 校准
+     FPGA 验证成功    示波器见波形    调参可用         波形干净
 ```
 
 ## 教学方法 | Teaching Methods
@@ -124,7 +139,7 @@ Day  1  2  3  4  5  6  7  8  9  10 11 12
 - **了解二进制和十六进制** -- 数字系统基础
 - **不需要 FPGA 经验** -- 课程从逻辑门教起
 - **不需要 Verilog 经验** -- Day 2 从零开始
-- **不需要嵌入式 Linux 经验** -- 使用 bare-metal standalone 模式
+- **不需要嵌入式开发经验** -- 主线全在 FPGA 里跑，没有 ARM/PS 软件层
 - **需要兴趣和耐心** -- 这是最重要的！
 
 See `prerequisites.md` for details. In brief:
@@ -133,7 +148,7 @@ See `prerequisites.md` for details. In brief:
 - **Familiarity with binary and hexadecimal** -- digital system basics
 - **No FPGA experience required** -- we start from logic gates
 - **No Verilog experience required** -- Day 2 starts from scratch
-- **No embedded Linux experience required** -- we use bare-metal standalone mode
+- **No embedded development experience required** -- the main line runs entirely in the FPGA, no ARM/PS software layer
 - **Interest and patience required** -- this is what matters most!
 
 ## 评估方式 | Assessment
