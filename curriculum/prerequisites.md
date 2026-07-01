@@ -1,4 +1,5 @@
 # 前置知识与准备 | Prerequisites & Preparation
+<!-- 注：价格信息已注释隐藏（查价不准确，仅作参考不严谨）/ Note: price info commented out (inaccurate, not rigorous as reference) -->
 
 ## 概述 | Overview
 
@@ -58,12 +59,12 @@ This course is designed to be beginner-friendly, but preparation in advance will
 
 | 物品 Item | 数量 | 参考价格 | 备注 Notes |
 |-----------|------|---------|-----------|
-| TinyAWG ZYNQ7010 核心板套件 | 1 套 | ~220 元 | 含 ZYNQ7010 核心板 + 底板 + 屏幕，淘宝/立创开源硬件平台搜索 "TinyAWG" |
-| Micro-USB 或 Type-C 数据线 | 1 | 5 元 | 确保是数据线而非充电线 |
-| 杜邦线套装 | 1 套 | 5 元 | 公对公+公对母，调试用 |
-| 面包板 830孔 (可选) | 1 | 8 元 | 前期实验用 |
+| TinyAWG ZYNQ7010 核心板套件 | 1 套 | <!-- ~220 元 --> | 含 ZYNQ7010 核心板 + 底板 + 屏幕，淘宝/立创开源硬件平台搜索 "TinyAWG" |
+| Micro-USB 或 Type-C 数据线 | 1 | <!-- 5 元 --> | 确保是数据线而非充电线 |
+| 杜邦线套装 | 1 套 | <!-- 5 元 --> | 公对公+公对母，调试用 |
+| 面包板 830孔 (可选) | 1 | <!-- 8 元 --> | 前期实验用 |
 
-**总计约 220 元** (核心板套件已含大部分元器件)
+**<!-- 总计约 220 元 -->** (核心板套件已含大部分元器件)
 
 > 提示：TinyAWG 是开源项目，PCB 可直接从嘉立创下单打样。建议在淘宝搜索 "ZYNQ7010 开发板" 或 "TinyAWG" 购买预焊接好的完整套件，省去前期贴片焊接的麻烦。
 > Tip: TinyAWG is an open-source project. PCBs can be ordered from JLC (嘉立创). Search "ZYNQ7010 dev board" or "TinyAWG" on Taobao for pre-assembled kits, saving you from SMD soldering initially.

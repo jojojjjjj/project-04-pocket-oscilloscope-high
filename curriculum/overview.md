@@ -24,7 +24,7 @@ This is a full-time summer practicum course for high school students, spanning 2
 | 交互输入 | EC11 旋转编码器 (选波形/调频/切菜单) |
 | 波形查找表 | 1024 点 BRAM LUT (正弦/方波/三角/锯齿) |
 | 工具链 | Yosys + nextpnr + IceStorm (全开源免费) |
-| 参考成本 | ~178 元 (全部现成开发板+模块) |
+| 参考成本 | <!-- ~178 元 (全部现成开发板+模块) --> |
 
 ## 学习目标 | Learning Objectives
 

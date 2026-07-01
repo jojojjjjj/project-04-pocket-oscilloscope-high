@@ -382,9 +382,9 @@ Phase 3 (Day 9-12): 交互与集成
 
 You have completed the entire WavePocket -- Pocket Signal Generator course!
 
-12 天前，你可能连 FPGA 是什么都不知道。现在，你拥有了一台自己接线、调试、跑通的信号发生器。它基于 iCE40 FPGA，能输出正弦波、方波、三角波、锯齿波，带 TFT 屏幕显示和编码器调参，示波器上能看到干净的真实波形。这台设备的成本只有约 178 元，但包含了专业 AWG 的全部核心原理。
+12 天前，你可能连 FPGA 是什么都不知道。现在，你拥有了一台自己接线、调试、跑通的信号发生器。它基于 iCE40 FPGA，能输出正弦波、方波、三角波、锯齿波，带 TFT 屏幕显示和编码器调参，示波器上能看到干净的真实波形。这台设备的成本<!-- 只有约 178 元 -->很低，但包含了专业 AWG 的全部核心原理。
 
-12 days ago, you might not have known what an FPGA was. Now you own a signal generator that you wired, debugged, and brought to life yourself. Based on an iCE40 FPGA, it outputs sine, square, triangle, and sawtooth waves, with a TFT display and encoder tuning, and you can see clean real waveforms on the oscilloscope. This device costs only about 178 yuan but contains all core principles of professional AWGs.
+12 days ago, you might not have known what an FPGA was. Now you own a signal generator that you wired, debugged, and brought to life yourself. Based on an iCE40 FPGA, it outputs sine, square, triangle, and sawtooth waves, with a TFT display and encoder tuning, and you can see clean real waveforms on the oscilloscope. This device <!-- costs only about 178 yuan --> is very low cost but contains all core principles of professional AWGs.
 
 **这就是工程的魅力所在。**
 
